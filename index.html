@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagaska Music</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --g:#1DB954;--g2:#1ed760;--bg:#06060f;
+  --s1:#0d0d1c;--s2:#12122a;--s3:#181830;--s4:#202040;--s5:#282850;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.13);
+  --tx:#eeeeff;--mt:#7878a8;--rd:#ff4d6d;--acc:#7c5cbf;--yw:#ffa726;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
+
+/* BG */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(29,185,84,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(29,185,84,.03) 1px,transparent 1px);
+  background-size:58px 58px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 10%,black 40%,transparent 100%);}
+.orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.o1{width:600px;height:600px;background:rgba(29,185,84,.09);top:-200px;left:-160px;animation:fl 20s ease-in-out infinite}
+.o2{width:500px;height:500px;background:rgba(124,92,191,.07);bottom:-160px;right:-160px;animation:fl 26s ease-in-out infinite reverse}
+.o3{width:260px;height:260px;background:rgba(30,215,96,.05);top:45%;left:55%;animation:fl 14s ease-in-out infinite 5s}
+@keyframes fl{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(50px,-50px) scale(1.1)}66%{transform:translate(-40px,40px) scale(.9)}}
+
+/* LAYOUT */
+.wrap{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 20px 150px}
+
+/* ── TOPBAR ────────────────────────────────────────────── */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(6,6,15,.92);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--bd);
+  padding:10px 20px;margin:0 -20px;
+  display:flex;align-items:center;gap:12px;
+}
+.tb-brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.tb-ico{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--g),var(--g2));display:flex;align-items:center;justify-content:center;font-size:.95rem;color:#000;flex-shrink:0}
+.tb-name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800}
+.tb-ver{font-size:.56rem;color:var(--mt);letter-spacing:2px;text-transform:uppercase}
+
+.search-row{
+  flex:1;max-width:500px;
+  display:flex;align-items:center;gap:8px;
+  background:var(--s2);border:1px solid var(--bd);
+  border-radius:14px;padding:5px 5px 5px 14px;transition:all .22s;
+}
+.search-row:focus-within{border-color:rgba(29,185,84,.5);box-shadow:0 0 0 3px rgba(29,185,84,.08)}
+.search-row input{flex:1;background:transparent;border:none;outline:none;color:var(--tx);font-size:.88rem;font-family:inherit}
+.search-row input::placeholder{color:var(--mt)}
+.s-btn{
+  background:linear-gradient(135deg,var(--g),var(--g2));border:none;border-radius:10px;
+  padding:8px 16px;color:#000;font-weight:700;font-size:.8rem;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;
+  font-family:inherit;white-space:nowrap;
+}
+.s-btn:hover{transform:scale(1.04);box-shadow:0 4px 16px rgba(29,185,84,.3)}
+.s-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+
+.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto}
+.pill-btn{
+  padding:6px 12px;border-radius:10px;border:1px solid var(--bd);
+  background:var(--s2);color:var(--mt);font-size:.74rem;font-weight:600;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;font-family:inherit;
+}
+.pill-btn:hover{border-color:rgba(29,185,84,.4);color:var(--g)}
+.pill-btn.danger:hover{border-color:rgba(255,77,109,.4);color:var(--rd)}
+.dot-pulse{width:5px;height:5px;border-radius:50%;background:var(--g);animation:pulse 2s infinite}
+.dot-off{background:var(--yw)!important}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+
+.user-pill{
+  display:flex;align-items:center;gap:8px;
+  background:var(--s2);border:1px solid var(--bd);
+  border-radius:20px;padding:4px 12px 4px 4px;cursor:pointer;transition:all .2s;
+}
+.user-pill:hover{background:var(--s3)}
+.u-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--g));display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#fff;flex-shrink:0}
+.u-nm{font-size:.76rem;font-weight:700}
+.u-gn{font-size:.6rem;color:var(--mt)}
+
+/* ── SUGGESTIONS ─────────────────────────────────────── */
+.sugs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.sug{
+  padding:5px 12px;border-radius:20px;
+  background:var(--s2);border:1px solid var(--bd);
+  font-size:.73rem;color:var(--mt);cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;gap:5px;
+}
+.sug:hover{background:var(--s3);color:var(--tx)}
+.sug-x{margin-left:2px;opacity:.5;font-size:.6rem;cursor:pointer}
+.sug-x:hover{opacity:1;color:var(--rd)}
+
+/* ── STATES ──────────────────────────────────────────── */
+.state{text-align:center;padding:60px 20px;display:none}
+.state.show{display:block}
+.st-ico{width:70px;height:70px;border-radius:20px;background:var(--s2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 18px;color:var(--mt)}
+.state h3{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:8px}
+.state p{color:var(--mt);font-size:.88rem;line-height:1.6;max-width:400px;margin:0 auto}
+.state.err .st-ico{color:var(--rd);border-color:rgba(255,77,109,.2);background:rgba(255,77,109,.05)}
+.state.err h3{color:var(--rd)}
+.spin-lg{animation:sp .7s linear infinite;font-size:2rem;color:var(--g)}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── HERO ─────────────────────────────────────────────── */
+.hero{margin-top:18px;display:none}
+.hero.show{display:block}
+.hero-card{
+  background:var(--s1);border:1px solid var(--bd);border-radius:22px;overflow:hidden;
+  display:grid;grid-template-columns:210px 1fr;
+  animation:cardIn .4s cubic-bezier(.16,1,.3,1);
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.h-art{width:210px;height:210px;position:relative;overflow:hidden;flex-shrink:0}
+.h-art img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.h-art:hover img{transform:scale(1.07)}
+.h-ring{position:absolute;inset:0;background:rgba(29,185,84,.18);display:none;align-items:center;justify-content:center}
+.h-ring.on{display:flex}
+.eq{display:flex;align-items:flex-end;gap:3px;height:24px}
+.eq span{width:4px;border-radius:2px;background:var(--g);animation:eq 1s ease-in-out infinite}
+.eq span:nth-child(1){height:10px;animation-delay:.00s}
+.eq span:nth-child(2){height:20px;animation-delay:.10s}
+.eq span:nth-child(3){height:7px; animation-delay:.20s}
+.eq span:nth-child(4){height:17px;animation-delay:.30s}
+.eq span:nth-child(5){height:13px;animation-delay:.40s}
+@keyframes eq{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.3)}}
+
+.h-info{padding:22px 24px;display:flex;flex-direction:column;justify-content:space-between;min-width:0}
+.h-src-badge{
+  display:inline-flex;align-items:center;gap:5px;margin-bottom:10px;
+  font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+  padding:3px 9px;border-radius:20px;width:fit-content;
+}
+.badge-db{ background:rgba(124,92,191,.15);color:#c09cff;border:1px solid rgba(124,92,191,.3)}
+.badge-api{background:rgba(29,185,84,.12);color:var(--g);border:1px solid rgba(29,185,84,.25)}
+.badge-cached{background:rgba(255,167,38,.1);color:var(--yw);border:1px solid rgba(255,167,38,.25)}
+.h-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;line-height:1.2;margin-bottom:5px}
+.h-artist{font-size:.93rem;color:var(--mt);margin-bottom:3px}
+.h-album{font-size:.78rem;color:var(--mt);opacity:.7}
+.h-chips{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;background:var(--s3);border:1px solid var(--bd);font-size:.74rem;color:var(--mt)}
+.chip i{color:var(--g);font-size:.67rem}
+.h-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn-play{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:11px;border:none;
+  background:linear-gradient(135deg,var(--g),var(--g2));
+  color:#000;font-weight:700;font-size:.87rem;cursor:pointer;
+  transition:all .2s;font-family:inherit;
+}
+.btn-play:hover{transform:scale(1.04);box-shadow:0 5px 20px rgba(29,185,84,.4)}
+.btn-play.pause-state{background:linear-gradient(135deg,#dde,#fff)}
+.ico-btn{
+  width:34px;height:34px;border-radius:9px;border:1px solid var(--bd);
+  background:var(--s3);color:var(--mt);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;font-size:.82rem;
+}
+.ico-btn:hover{background:var(--s4);color:var(--tx);border-color:var(--bd2)}
+.ico-btn.liked{color:var(--rd);border-color:rgba(255,77,109,.3)}
+.ico-btn.spotify-btn{color:var(--g);border-color:rgba(29,185,84,.3)}
+
+/* ── SECTIONS ────────────────────────────────────────── */
+.sec{margin-top:26px}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-hd h3{font-family:'Syne',sans-serif;font-size:.98rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.sec-cnt{font-size:.7rem;color:var(--mt);background:var(--s3);padding:2px 8px;border-radius:20px}
+.sec-btn{font-size:.73rem;color:var(--mt);cursor:pointer;border:none;background:none;font-family:inherit;display:flex;align-items:center;gap:5px;transition:color .2s}
+.sec-btn:hover{color:var(--rd)}
+.sec-btn.green:hover{color:var(--g)}
+
+/* ── TABS ─────────────────────────────────────────────── */
+.tabs{display:flex;gap:2px;background:var(--s2);border-radius:11px;padding:3px;border:1px solid var(--bd);width:fit-content}
+.tab{padding:6px 15px;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--mt);transition:all .2s;border:none;background:transparent;font-family:inherit}
+.tab.on{background:var(--s4);color:var(--tx);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.q-badge{background:var(--g);color:#000;font-size:.58rem;font-weight:800;padding:1px 6px;border-radius:20px;margin-left:4px}
+
+/* ── TRACK LIST ───────────────────────────────────────── */
+.tlist{display:flex;flex-direction:column;gap:2px}
+.ti{
+  display:grid;grid-template-columns:24px 44px 1fr auto auto auto;
+  align-items:center;gap:10px;padding:8px 10px;
+  border-radius:10px;cursor:pointer;transition:all .18s;
+  border:1px solid transparent;
+}
+.ti:hover{background:var(--s2);border-color:var(--bd)}
+.ti.on{background:rgba(29,185,84,.07);border-color:rgba(29,185,84,.2)}
+.ti-n{font-size:.74rem;color:var(--mt);text-align:center;font-weight:500}
+.ti.on .ti-n{color:var(--g)}
+.ti-th{width:44px;height:44px;border-radius:7px;overflow:hidden;flex-shrink:0}
+.ti-th img{width:100%;height:100%;object-fit:cover}
+.ti-inf{min-width:0}
+.ti-t{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px}
+.ti.on .ti-t{color:var(--g)}
+.ti-a{font-size:.73rem;color:var(--mt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ti-src{font-size:.6rem;padding:2px 7px;border-radius:7px;font-weight:700;white-space:nowrap}
+.src-db{background:rgba(124,92,191,.15);color:#c09cff;border:1px solid rgba(124,92,191,.25)}
+.src-api{background:rgba(29,185,84,.1);color:var(--g);border:1px solid rgba(29,185,84,.2)}
+.ti-dur{font-size:.72rem;color:var(--mt);white-space:nowrap}
+.ti-del{width:24px;height:24px;border-radius:6px;border:none;background:transparent;color:var(--mt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.68rem;transition:all .2s;opacity:0}
+.ti:hover .ti-del{opacity:1}
+.ti-del:hover{background:rgba(255,77,109,.15);color:var(--rd)}
+.empty-ti{text-align:center;padding:32px;color:var(--mt);font-size:.85rem}
+.empty-ti i{font-size:1.8rem;display:block;margin-bottom:8px;opacity:.3}
+
+/* ── DB GRID (lagu tersimpan di Supabase) ─────────────── */
+.db-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px}
+.dg-card{
+  background:var(--s2);border:1px solid var(--bd);border-radius:13px;
+  padding:11px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
+}
+.dg-card:hover{background:var(--s3);transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.4)}
+.dg-thumb{width:100%;aspect-ratio:1;border-radius:7px;overflow:hidden;margin-bottom:9px;position:relative}
+.dg-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.dg-card:hover .dg-thumb img{transform:scale(1.06)}
+.dg-play{
+  position:absolute;bottom:6px;right:6px;width:34px;height:34px;border-radius:50%;
+  background:var(--g);border:none;display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(6px);transition:all .22s;cursor:pointer;color:#000;font-size:.78rem;
+}
+.dg-card:hover .dg-play{opacity:1;transform:translateY(0)}
+.dg-play:hover{background:var(--g2);transform:scale(1.08)!important}
+.dg-title{font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.dg-artist{font-size:.71rem;color:var(--mt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dg-meta{font-size:.63rem;color:var(--mt);margin-top:4px;display:flex;gap:6px;align-items:center}
+.dg-by{font-size:.6rem;color:var(--acc);opacity:.8}
+
+/* ── PROFILE DROPDOWN ─────────────────────────────────── */
+.pdrop{
+  position:fixed;top:58px;right:20px;
+  background:var(--s3);border:1px solid var(--bd2);border-radius:14px;
+  padding:6px;min-width:210px;
+  box-shadow:0 14px 40px rgba(0,0,0,.7);z-index:200;
+  display:none;animation:dropIn .2s cubic-bezier(.16,1,.3,1);
+}
+.pdrop.open{display:block}
+@keyframes dropIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.pd-info{padding:10px 12px;border-bottom:1px solid var(--bd);margin-bottom:4px}
+.pd-name{font-size:.88rem;font-weight:700;margin-bottom:2px}
+.pd-sub{font-size:.72rem;color:var(--mt)}
+.pd-item{padding:8px 12px;border-radius:9px;cursor:pointer;font-size:.82rem;font-weight:600;transition:background .2s;display:flex;align-items:center;gap:9px}
+.pd-item:hover{background:var(--s4)}
+.pd-item.danger{color:var(--rd)}
+.pd-item.danger:hover{background:rgba(255,77,109,.08)}
+.pd-div{height:1px;background:var(--bd);margin:4px 0}
+
+/* ── PLAYER BAR ───────────────────────────────────────── */
+.pbar{
+  position:fixed;bottom:0;left:0;width:100%;
+  background:rgba(6,6,15,.97);backdrop-filter:blur(22px);
+  border-top:1px solid var(--bd);
+  transform:translateY(100%);transition:transform .35s cubic-bezier(.16,1,.3,1);z-index:1000;
+}
+.pbar.up{transform:translateY(0)}
+.pinner{
+  max-width:1000px;margin:0 auto;padding:11px 20px;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;
+}
+/* left */
+.pl-l{display:flex;align-items:center;gap:10px;min-width:0}
+.pl-img{width:46px;height:46px;border-radius:9px;overflow:hidden;flex-shrink:0;position:relative}
+.pl-img img{width:100%;height:100%;object-fit:cover}
+.pl-eq{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;border-radius:9px}
+.pl-eq.on{display:flex}
+.pl-tx{min-width:0}
+.pl-title{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-art{font-size:.71rem;color:var(--mt)}
+.pl-src{font-size:.58rem;color:var(--mt);margin-top:1px}
+.pb-like{width:26px;height:26px;border-radius:7px;border:none;background:transparent;color:var(--mt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .2s;flex-shrink:0}
+.pb-like:hover{color:var(--rd)}
+.pb-like.on{color:var(--rd)}
+/* center */
+.pl-c{display:flex;flex-direction:column;align-items:center;gap:5px}
+.pl-ctrls{display:flex;align-items:center;gap:10px}
+.cb{background:none;border:none;color:var(--mt);font-size:.96rem;cursor:pointer;transition:all .18s;padding:4px;display:flex;align-items:center;justify-content:center}
+.cb:hover{color:var(--tx);transform:scale(1.1)}
+.cb.play-btn{width:34px;height:34px;border-radius:50%;background:#fff;color:#000;font-size:.85rem}
+.cb.play-btn:hover{background:var(--g);transform:scale(1.08)}
+.cb.on{color:var(--g)}
+.progrow{width:100%;max-width:440px;display:flex;align-items:center;gap:7px}
+.pt{font-size:.62rem;color:var(--mt);min-width:28px;text-align:center}
+.prbar{flex:1;height:4px;background:rgba(255,255,255,.14);border-radius:2px;cursor:pointer;position:relative}
+.prfill{height:100%;background:var(--g);border-radius:2px;width:0%;position:relative}
+.prfill::after{content:'';position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:#fff;border-radius:50%;opacity:0;transition:opacity .2s}
+.prbar:hover .prfill::after{opacity:1}
+/* right */
+.pl-r{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.vrow{display:flex;align-items:center;gap:6px}
+.vbar{width:78px;height:4px;background:rgba(255,255,255,.14);border-radius:2px;cursor:pointer}
+.vfill{height:100%;background:#fff;border-radius:2px;width:70%}
+
+/* ── TOAST ────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(12px);
+  background:var(--s4);color:var(--tx);padding:9px 18px;border-radius:11px;
+  font-size:.81rem;font-weight:500;
+  border:1px solid var(--bd2);box-shadow:0 8px 28px rgba(0,0,0,.55);
+  opacity:0;transition:all .26s;z-index:9999;white-space:nowrap;pointer-events:none;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── RESPONSIVE ───────────────────────────────────────── */
+@media(max-width:680px){
+  .hero-card{grid-template-columns:1fr}
+  .h-art{width:100%;height:200px}
+  .h-info{padding:18px}
+  .h-title{font-size:1.2rem}
+  .pl-r{display:none}
+  .pinner{grid-template-columns:1fr auto}
+  .progrow{display:none}
+  .ti{grid-template-columns:24px 44px 1fr auto}
+  .ti-src,.ti-dur{display:none}
+}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="orb o3"></div>
+
+<div class="wrap">
+
+  <!-- ── TOPBAR ────────────────────────────────────────── -->
+  <div class="topbar">
+    <div class="tb-brand">
+      <div class="tb-ico"><i class="fab fa-spotify"></i></div>
+      <div>
+        <div class="tb-name">Pagaska Music</div>
+        <div class="tb-ver">FAA API · Supabase</div>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <i class="fas fa-search" style="color:var(--mt);font-size:.8rem;flex-shrink:0"></i>
+      <input type="text" id="sInput" placeholder="Cari lagu atau artis..." autocomplete="off">
+      <button class="s-btn" id="sBtn" onclick="doSearch()">
+        <i class="fas fa-search" id="sBtnIco"></i>
+        <span id="sBtnTxt">Cari</span>
+      </button>
+    </div>
+
+    <div class="tb-right">
+      <div class="pill-btn" id="dbPill" title="Status Supabase" onclick="loadDBTracks()">
+        <span class="dot-pulse" id="dbDot"></span>
+        <span id="dbTxt">Supabase</span>
+      </div>
+      <button class="pill-btn" onclick="toggleLikedSec()" title="Lagu Disukai">
+        <i class="fas fa-heart" style="color:var(--rd)"></i>
+        <span id="likedBadge" class="q-badge" style="display:none">0</span>
+      </button>
+      <div class="user-pill" onclick="togglePD()">
+        <div class="u-av" id="uAv">?</div>
+        <div>
+          <div class="u-nm" id="uNm">–</div>
+          <div class="u-gn" id="uGn">–</div>
+        </div>
+        <i class="fas fa-caret-down" style="font-size:.6rem;color:var(--mt);margin-left:2px"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SUGGESTIONS ──────────────────────────────────── -->
+  <div class="sugs" id="sugList" style="margin-top:10px"></div>
+
+  <!-- ── STATES ───────────────────────────────────────── -->
+  <div class="state show" id="stEmpty">
+    <div class="st-ico"><i class="fas fa-compact-disc"></i></div>
+    <h3>Pagaska Music</h3>
+    <p>Cari lagu apapun — hasil otomatis tersimpan ke Supabase dan bisa diputar ulang oleh semua anggota tanpa request ulang ke FAA API.</p>
+  </div>
+  <div class="state" id="stLoad">
+    <div class="st-ico"><i class="fas fa-circle-notch spin-lg"></i></div>
+    <h3 id="stLoadT">Mencari...</h3>
+    <p id="stLoadM">Memeriksa database</p>
+  </div>
+  <div class="state err" id="stErr">
+    <div class="st-ico"><i class="fas fa-exclamation-triangle"></i></div>
+    <h3 id="stErrT">Gagal</h3>
+    <p id="stErrM">–</p>
+  </div>
+
+  <!-- ── HERO ─────────────────────────────────────────── -->
+  <div class="hero" id="hero">
+    <div class="hero-card">
+      <div class="h-art">
+        <img id="hImg" src="" alt="">
+        <div class="h-ring" id="hRing">
+          <div class="eq"><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+      </div>
+      <div class="h-info">
+        <div>
+          <div id="hBadge" class="h-src-badge badge-api" style="display:none"></div>
+          <div class="h-title"  id="hTitle">–</div>
+          <div class="h-artist" id="hArtist">–</div>
+          <div class="h-album"  id="hAlbum">–</div>
+          <div class="h-chips">
+            <div class="chip"><i class="far fa-clock"></i><span id="hDur">–</span></div>
+            <div class="chip"><i class="far fa-calendar"></i><span id="hYear">–</span></div>
+            <div class="chip" id="hPlays" style="display:none"><i class="fas fa-headphones"></i><span id="hPlaysN">0</span> diputar</div>
+          </div>
+        </div>
+        <div class="h-actions">
+          <button class="btn-play" id="hPlayBtn" onclick="playOrToggle()">
+            <i class="fas fa-play" id="hPlayIco"></i><span id="hPlayTxt">Putar</span>
+          </button>
+          <div class="ico-btn" id="hLike" onclick="toggleLikeCurrent()" title="Suka"><i class="far fa-heart"></i></div>
+          <div class="ico-btn" onclick="addHeroToQueue()" title="Tambah ke Queue"><i class="fas fa-plus"></i></div>
+          <div class="ico-btn spotify-btn" id="hSpot" style="display:none" onclick="openSpotify()" title="Buka di Spotify"><i class="fab fa-spotify"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── QUEUE / HISTORY ──────────────────────────────── -->
+  <div class="sec" id="qSec" style="display:none">
+    <div class="sec-hd">
+      <div class="tabs">
+        <button class="tab on" id="tQ" onclick="switchTab('q')">Queue <span class="q-badge" id="qBadge">0</span></button>
+        <button class="tab"    id="tH" onclick="switchTab('h')">Riwayat</button>
+      </div>
+      <button class="sec-btn" id="tabActBtn" onclick="tabAction()">
+        <i class="fas fa-trash-alt"></i> Hapus semua
+      </button>
+    </div>
+    <div id="panQ" class="tlist"></div>
+    <div id="panH" class="tlist" style="display:none"></div>
+  </div>
+
+  <!-- ── DB CACHED TRACKS (Supabase) ──────────────────── -->
+  <div class="sec" id="dbSec" style="display:none">
+    <div class="sec-hd">
+      <h3>
+        <i class="fas fa-database" style="color:var(--acc)"></i>
+        Tersimpan di Supabase
+        <span class="sec-cnt" id="dbCnt">0</span>
+      </h3>
+      <button class="sec-btn green" onclick="loadDBTracks()"><i class="fas fa-sync-alt"></i> Refresh</button>
+    </div>
+    <div class="db-grid" id="dbGrid"></div>
+  </div>
+
+  <!-- ── LIKED ─────────────────────────────────────────── -->
+  <div class="sec" id="likedSec" style="display:none">
+    <div class="sec-hd">
+      <h3>❤️ Lagu Disukai <span class="sec-cnt" id="likedCntLbl">0</span></h3>
+      <button class="sec-btn" onclick="toggleLikedSec()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="tlist" id="likedList"></div>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- ── PROFILE DROPDOWN ──────────────────────────────── -->
+<div class="pdrop" id="pdrop">
+  <div class="pd-info">
+    <div class="pd-name" id="pdName">–</div>
+    <div class="pd-sub" id="pdSub">–</div>
+  </div>
+  <div class="pd-div"></div>
+  <div class="pd-item" onclick="loadDBTracks();document.getElementById('dbSec').style.display='block';togglePD()">
+    <i class="fas fa-database" style="color:var(--acc)"></i> Musik di Supabase
+  </div>
+  <div class="pd-item" onclick="toggleLikedSec();togglePD()">
+    <i class="fas fa-heart" style="color:var(--rd)"></i> Lagu Disukai
+  </div>
+  <div class="pd-div"></div>
+  <div class="pd-item danger" onclick="doLogout()">
+    <i class="fas fa-sign-out-alt"></i> Keluar
+  </div>
+</div>
+
+<!-- ── PLAYER BAR ──────────────────────────────────────── -->
+<div class="pbar" id="pbar">
+  <div class="pinner">
+    <div class="pl-l">
+      <div class="pl-img">
+        <img id="plImg" src="" alt="">
+        <div class="pl-eq" id="plEq">
+          <div class="eq" style="transform:scale(.55)"><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+      </div>
+      <div class="pl-tx">
+        <div class="pl-title" id="plTitle">–</div>
+        <div class="pl-art"   id="plArt">–</div>
+        <div class="pl-src"   id="plSrc"></div>
+      </div>
+      <button class="pb-like" id="pbLike" onclick="toggleLikeCurrent()"><i class="far fa-heart"></i></button>
+    </div>
+
+    <div class="pl-c">
+      <div class="pl-ctrls">
+        <button class="cb" id="cbShuf" onclick="toggleShuffle()" title="Shuffle"><i class="fas fa-random"></i></button>
+        <button class="cb" onclick="prevTrack()"><i class="fas fa-step-backward"></i></button>
+        <button class="cb play-btn" id="cbPlay" onclick="togglePlay()"><i class="fas fa-play" id="cbIco"></i></button>
+        <button class="cb" onclick="nextTrack()"><i class="fas fa-step-forward"></i></button>
+        <button class="cb" id="cbRep" onclick="toggleRepeat()" title="Repeat"><i class="fas fa-redo"></i></button>
+      </div>
+      <div class="progrow">
+        <span class="pt" id="ptCur">0:00</span>
+        <div class="prbar" id="prbar" onclick="seek(event)"><div class="prfill" id="prfill"></div></div>
+        <span class="pt" id="ptTot">0:00</span>
+      </div>
+    </div>
+
+    <div class="pl-r">
+      <button class="cb" onclick="toggleMute()"><i class="fas fa-volume-up" id="vIco"></i></button>
+      <div class="vrow">
+        <div class="vbar" id="vBar" onclick="setVol(event)"><div class="vfill" id="vFill"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<audio id="audioEl"></audio>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  ★ KONFIGURASI SUPABASE — KHUSUS DATA MUSIK ★
+//  Auth anggota → _lib/db.js (tidak pakai Supabase)
+//  Musik (cache, history, liked) → Supabase di bawah ini
+//
+//  Setup:
+//  1. https://supabase.com → New Project
+//  2. Settings → API → copy URL & anon key
+//  3. SQL Editor → jalankan SQL di bawah
+// ════════════════════════════════════════════════════════════════
+const SB_URL = 'https://ygwoddwdhelqcwhpqasl.supabase.co';       // https://xxx.supabase.co
+const SB_KEY = 'sb_publishable_i-ZxUgB2a4d0H9wiu4iAJA_5dlvcgQn';  // eyJhbGci...
+
+/* ── SQL untuk Supabase (jalankan SEKALI di SQL Editor) ──────
+create table if not exists tracks (
+  id           text primary key,
+  title        text not null,
+  artist       text not null,
+  album        text default '',
+  duration     text default '0:00',
+  year         text default '',
+  thumbnail    text default '',
+  audio_url    text not null,
+  spotify_url  text,
+  search_query text,
+  searched_by  text,          -- nama user yang pertama search
+  play_count   int  default 0,
+  created_at   timestamptz default now(),
+  last_played  timestamptz
+);
+create table if not exists liked (
+  id         bigserial primary key,
+  user_key   text not null,   -- "{nama}_{generasi}"
+  track_id   text not null references tracks(id) on delete cascade,
+  created_at timestamptz default now(),
+  unique(user_key, track_id)
+);
+create table if not exists play_history (
+  id         bigserial primary key,
+  user_key   text not null,
+  track_id   text not null references tracks(id) on delete cascade,
+  played_at  timestamptz default now()
+);
+
+alter table tracks       enable row level security;
+alter table liked        enable row level security;
+alter table play_history enable row level security;
+create policy "all_tracks"   on tracks       for all using (true) with check (true);
+create policy "all_liked"    on liked        for all using (true) with check (true);
+create policy "all_history"  on play_history for all using (true) with check (true);
+── ──────────────────────────────────────────────────────────── */
+
+const FAA_BASE = 'https://api-faa.my.id/faa/spotify-play';
+const SESS_KEY = 'pgsk_v2_session';
+
+// ════════════════════════════════════════════════════════════════
+//  SUPABASE MINI-CLIENT
+// ════════════════════════════════════════════════════════════════
+const sbOk = SB_URL !== 'https://ygwoddwdhelqcwhpqasl.supabase.co';
+
+const sb = sbOk ? {
+  _h: { 'Content-Type':'application/json', apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, Prefer:'return=representation' },
+  _base: SB_URL.replace(/\/$/,'') + '/rest/v1/',
+
+  async req(method, table, qs, body) {
+    const r = await fetch(this._base + table + (qs ? '?'+qs : ''), {
+      method, headers: this._h, body: body ? JSON.stringify(body) : undefined
+    });
+    const t = await r.text();
+    let d; try { d = JSON.parse(t); } catch { d = t; }
+    if (!r.ok) throw new Error(d?.message || d?.error || 'HTTP '+r.status);
+    return d;
+  },
+
+  get(table, qs)       { return this.req('GET',    table, qs); },
+  post(table, body)    { return this.req('POST',   table, '', body); },
+  patch(table, qs, b)  { return this.req('PATCH',  table, qs, b); },
+  del(table, qs)       { return this.req('DELETE', table, qs); },
+
+  // Upsert via on_conflict
+  upsert(table, body, conflict='id') {
+    return this.req('POST', table, 'on_conflict='+conflict, body);
+  },
+} : null;
+
+// ════════════════════════════════════════════════════════════════
+//  SESSION GUARD
+// ════════════════════════════════════════════════════════════════
+const session = JSON.parse(localStorage.getItem(SESS_KEY) || 'null');
+if (!session) { window.location.href = 'login.html'; }
+const USER_KEY = session ? `${session.nama}_${session.generasi}` : 'guest';
+
+function doLogout() {
+  localStorage.removeItem(SESS_KEY);
+  window.location.href = 'login.html';
+}
+
+// ════════════════════════════════════════════════════════════════
+//  LOCAL STATE (queue, history, liked — backup & offline)
+// ════════════════════════════════════════════════════════════════
+const LS = {
+  q()     { return JSON.parse(localStorage.getItem('pm2_q')||'[]') },
+  sq(v)   { localStorage.setItem('pm2_q', JSON.stringify(v)) },
+  h()     { return JSON.parse(localStorage.getItem('pm2_h')||'[]') },
+  sh(v)   { localStorage.setItem('pm2_h', JSON.stringify(v)) },
+  l()     { return JSON.parse(localStorage.getItem('pm2_l')||'[]') },
+  sl(v)   { localStorage.setItem('pm2_l', JSON.stringify(v)) },
+  sugs()  { return JSON.parse(localStorage.getItem('pm2_s')||'[]') },
+  ssug(v) { localStorage.setItem('pm2_s', JSON.stringify(v)) },
+};
+
+let queue        = LS.q();
+let histArr      = LS.h();
+let likedArr     = LS.l();
+let qi           = -1;
+let currentTrack = null;
+let isPlaying    = false;
+let isShuffle    = false;
+let isRepeat     = false;
+let isMuted      = false;
+let vol          = 0.7;
+let progInt;
+const audio = document.getElementById('audioEl');
+
+// ════════════════════════════════════════════════════════════════
+//  SEARCH — Cek Supabase dulu, kalau tidak ada baru FAA API
+// ════════════════════════════════════════════════════════════════
+document.getElementById('sInput').addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+
+async function doSearch() {
+  const q = document.getElementById('sInput').value.trim();
+  if (!q) return;
+
+  setState('load');
+  setStLoad(`Mencari "${q}"`, 'Memeriksa database Supabase...');
+  setBtnLoad(true);
+
+  try {
+    // ── STEP 1: Cek Supabase cache ──────────────────────────
+    if (sbOk) {
+      const cached = await sb.get('tracks',
+        `search_query=ilike.${encodeURIComponent('%'+q+'%')}&order=play_count.desc&limit=1`
+      );
+      if (cached?.length) {
+        const t = rowToTrack(cached[0], 'db');
+        setStLoad(`Ditemukan di database!`, '📦 Memuat dari Supabase...');
+        showHero(t, 'db');
+        addToQueue(t);
+        setState('none');
+        await playTrackObj(t);
+        // increment play_count
+        sb.patch('tracks', `id=eq.${encodeURIComponent(t.id)}`, {
+          play_count:  (cached[0].play_count || 0) + 1,
+          last_played: new Date().toISOString()
+        }).catch(() => {});
+        saveSug(q);
+        return;
+      }
+    }
+
+    // ── STEP 2: Hit FAA API ─────────────────────────────────
+    setStLoad(`Mencari "${q}"`, '☁️ Mengunduh dari FAA API...');
+    const res = await fetch(`${FAA_BASE}?q=${encodeURIComponent(q)}`);
+    if (!res.ok) throw new Error('FAA API error HTTP ' + res.status);
+    const data = await res.json();
+
+    if (data.status !== true || !data.info || !data.download) {
+      throw new Error(data.message || 'Format respons FAA tidak dikenali');
+    }
+
+    const track = {
+      id:          data.info.spotify_url || 'faa_' + Date.now(),
+      title:       data.info.title       || 'Unknown Title',
+      artist:      data.info.artist      || 'Unknown Artist',
+      album:       data.info.album       || '',
+      duration:    data.info.duration    || '0:00',
+      year:        data.info.release_date|| '–',
+      thumbnail:   data.info.thumbnail   || '',
+      audio:       data.download.url,
+      spotifyUrl:  data.info.spotify_url || null,
+      searchQuery: q,
+      source:      'api',
+      playCount:   1,
+    };
+
+    // ── STEP 3: Simpan ke Supabase (cache permanen) ─────────
+    if (sbOk) {
+      try {
+        await sb.upsert('tracks', {
+          id:           track.id,
+          title:        track.title,
+          artist:       track.artist,
+          album:        track.album,
+          duration:     track.duration,
+          year:         track.year,
+          thumbnail:    track.thumbnail,
+          audio_url:    track.audio,
+          spotify_url:  track.spotifyUrl,
+          search_query: q,
+          searched_by:  session?.nama || 'guest',
+          play_count:   1,
+          last_played:  new Date().toISOString(),
+        });
+        toast('✓ Lagu disimpan ke Supabase — bisa diputar ulang kapanpun!');
+      } catch (e) {
+        console.warn('[Supabase upsert]', e.message);
+        toast('⚠️ Gagal simpan ke Supabase — tetap diputar lokal');
+      }
+    }
+
+    saveSug(q);
+    addToQueue(track);
+    showHero(track, 'api');
+    setState('none');
+    await playTrackObj(track);
+
+  } catch (err) {
+    setState('err');
+    document.getElementById('stErrT').textContent = 'Gagal mengambil lagu';
+    document.getElementById('stErrM').textContent = err.message;
+    toast('⚠️ ' + err.message);
+    console.error(err);
+  } finally {
+    setBtnLoad(false);
+  }
+}
+
+// ── convert Supabase row → track object ──
+function rowToTrack(row, source='db') {
+  return {
+    id:          row.id,
+    title:       row.title,
+    artist:      row.artist,
+    album:       row.album       || '',
+    duration:    row.duration    || '0:00',
+    year:        row.year        || '–',
+    thumbnail:   row.thumbnail   || '',
+    audio:       row.audio_url,
+    spotifyUrl:  row.spotify_url || null,
+    playCount:   row.play_count  || 0,
+    searchQuery: row.search_query|| '',
+    searchedBy:  row.searched_by || '',
+    source,
+  };
+}
+
+function setBtnLoad(on) {
+  const b = document.getElementById('sBtn');
+  b.disabled = on;
+  document.getElementById('sBtnIco').className = on ? 'fas fa-circle-notch spin-lg' : 'fas fa-search';
+  document.getElementById('sBtnIco').style.fontSize = on ? '.8rem' : '';
+  document.getElementById('sBtnTxt').textContent = on ? 'Mencari...' : 'Cari';
+}
+
+function setStLoad(t, m) {
+  document.getElementById('stLoadT').textContent = t;
+  document.getElementById('stLoadM').textContent = m;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  HERO
+// ════════════════════════════════════════════════════════════════
+function showHero(t, src) {
+  currentTrack = t;
+  const PH = 'https://via.placeholder.com/210x210/0d0d1c/1DB954?text=♪';
+  document.getElementById('hImg').src          = t.thumbnail || PH;
+  document.getElementById('hTitle').textContent = t.title;
+  document.getElementById('hArtist').textContent= t.artist;
+  document.getElementById('hAlbum').textContent = t.album || '';
+  document.getElementById('hDur').textContent   = t.duration;
+  document.getElementById('hYear').textContent  = t.year;
+
+  // badge
+  const badge = document.getElementById('hBadge');
+  badge.style.display = 'inline-flex';
+  if (src === 'db') {
+    badge.className = 'h-src-badge badge-db';
+    badge.innerHTML = '<i class="fas fa-database"></i> Dari Database';
+  } else {
+    badge.className = 'h-src-badge badge-api';
+    badge.innerHTML = '<i class="fas fa-cloud-download-alt"></i> FAA API → Disimpan';
+  }
+
+  // play count
+  if (t.playCount) {
+    document.getElementById('hPlays').style.display = 'flex';
+    document.getElementById('hPlaysN').textContent = t.playCount;
+  }
+
+  // spotify link
+  document.getElementById('hSpot').style.display = t.spotifyUrl ? 'flex' : 'none';
+
+  document.getElementById('hero').classList.add('show');
+  updHeroPlayBtn();
+  updHeroLike();
+}
+
+function updHeroPlayBtn() {
+  const p = isPlaying && !audio.paused;
+  document.getElementById('hPlayIco').className  = p ? 'fas fa-pause' : 'fas fa-play';
+  document.getElementById('hPlayTxt').textContent = p ? 'Jeda' : 'Putar';
+  document.getElementById('hPlayBtn').classList.toggle('pause-state', p);
+  document.getElementById('hRing').classList.toggle('on', p);
+}
+
+function playOrToggle() {
+  if (!currentTrack) return;
+  if (audio.src === currentTrack.audio) { togglePlay(); return; }
+  playTrackObj(currentTrack);
+}
+
+function addHeroToQueue() {
+  if (!currentTrack) return;
+  addToQueue(currentTrack);
+  toast('Ditambahkan ke queue');
+}
+
+function openSpotify() {
+  if (currentTrack?.spotifyUrl) window.open(currentTrack.spotifyUrl, '_blank');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  QUEUE
+// ════════════════════════════════════════════════════════════════
+function addToQueue(t) {
+  queue = queue.filter(x => x.id !== t.id);
+  queue.unshift(t);
+  if (queue.length > 60) queue = queue.slice(0, 60);
+  LS.sq(queue);
+  qi = queue.findIndex(x => x.id === currentTrack?.id);
+  renderQueue();
+  document.getElementById('qSec').style.display = 'block';
+  document.getElementById('qBadge').textContent = queue.length;
+}
+
+function removeFromQueue(id) {
+  queue = queue.filter(t => t.id !== id);
+  LS.sq(queue);
+  qi = queue.findIndex(t => t.id === currentTrack?.id);
+  renderQueue();
+  document.getElementById('qBadge').textContent = queue.length;
+  if (!queue.length) document.getElementById('qSec').style.display = 'none';
+}
+
+function clearQueue() {
+  queue = []; LS.sq(queue); qi = -1;
+  renderQueue();
+  document.getElementById('qBadge').textContent = 0;
+  document.getElementById('qSec').style.display = 'none';
+}
+
+function renderQueue() {
+  const el = document.getElementById('panQ');
+  if (!queue.length) { el.innerHTML='<div class="empty-ti"><i class="fas fa-layer-group"></i>Queue kosong</div>'; return; }
+  el.innerHTML = queue.map((t,i) => `
+    <div class="ti ${currentTrack?.id===t.id?'on':''}" onclick='playTrackObj(${esc(t)})'>
+      <div class="ti-n">${currentTrack?.id===t.id ? '<i class="fas fa-volume-up" style="color:var(--g);font-size:.68rem"></i>' : i+1}</div>
+      <div class="ti-th"><img src="${t.thumbnail||''}" alt="" onerror="this.src='https://via.placeholder.com/44x44/0d0d1c/333?text=♪'"></div>
+      <div class="ti-inf"><div class="ti-t">${t.title}</div><div class="ti-a">${t.artist}</div></div>
+      <span class="ti-src ${t.source==='db'?'src-db':'src-api'}">${t.source==='db'?'DB':'API'}</span>
+      <div class="ti-dur">${t.duration}</div>
+      <button class="ti-del" onclick="event.stopPropagation();removeFromQueue('${t.id}')"><i class="fas fa-times"></i></button>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  HISTORY
+// ════════════════════════════════════════════════════════════════
+async function addToHistory(t) {
+  const entry = { ...t, playedAt: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) };
+  histArr = histArr.filter(x => x.id !== t.id);
+  histArr.unshift(entry);
+  if (histArr.length > 30) histArr = histArr.slice(0, 30);
+  LS.sh(histArr);
+  renderHistory();
+  // Supabase history
+  if (sbOk) {
+    sb.post('play_history', { user_key: USER_KEY, track_id: t.id, played_at: new Date().toISOString() })
+      .catch(() => {});
+  }
+}
+
+function clearHistory() { histArr = []; LS.sh(histArr); renderHistory(); }
+
+function renderHistory() {
+  const el = document.getElementById('panH');
+  if (!histArr.length) { el.innerHTML='<div class="empty-ti"><i class="fas fa-history"></i>Belum ada riwayat</div>'; return; }
+  el.innerHTML = histArr.map((t,i) => `
+    <div class="ti" onclick='playTrackObj(${esc(t)})'>
+      <div class="ti-n" style="font-size:.6rem">${t.playedAt||''}</div>
+      <div class="ti-th"><img src="${t.thumbnail||''}" alt="" onerror="this.src='https://via.placeholder.com/44x44/0d0d1c/333?text=♪'"></div>
+      <div class="ti-inf"><div class="ti-t">${t.title}</div><div class="ti-a">${t.artist}</div></div>
+      <span class="ti-src ${t.source==='db'?'src-db':'src-api'}">${t.source==='db'?'DB':'API'}</span>
+      <div class="ti-dur">${t.duration}</div>
+      <button class="ti-del" onclick="event.stopPropagation();removeHist('${t.id}')"><i class="fas fa-times"></i></button>
+    </div>
+  `).join('');
+}
+
+function removeHist(id) { histArr = histArr.filter(t=>t.id!==id); LS.sh(histArr); renderHistory(); }
+
+// ════════════════════════════════════════════════════════════════
+//  LIKED
+// ════════════════════════════════════════════════════════════════
+async function toggleLikeCurrent() {
+  if (!currentTrack) return;
+  const idx = likedArr.findIndex(l => l.id === currentTrack.id);
+  if (idx > -1) {
+    likedArr.splice(idx, 1);
+    toast('Dihapus dari Disukai');
+    if (sbOk) sb.del('liked', `user_key=eq.${USER_KEY}&track_id=eq.${encodeURIComponent(currentTrack.id)}`).catch(() => {});
+  } else {
+    likedArr.unshift(currentTrack);
+    toast('Ditambahkan ke Disukai ❤️');
+    if (sbOk) sb.post('liked', { user_key: USER_KEY, track_id: currentTrack.id }).catch(() => {});
+  }
+  LS.sl(likedArr);
+  updHeroLike(); updPBLike(); renderLiked(); updLikedCnt();
+}
+
+function updHeroLike() {
+  if (!currentTrack) return;
+  const on = likedArr.some(l => l.id === currentTrack.id);
+  const b = document.getElementById('hLike');
+  b.innerHTML = `<i class="${on?'fas':'far'} fa-heart" style="color:${on?'var(--rd)':''}"></i>`;
+  b.classList.toggle('liked', on);
+}
+
+function updPBLike() {
+  if (!currentTrack) return;
+  const on = likedArr.some(l => l.id === currentTrack.id);
+  const b = document.getElementById('pbLike');
+  b.innerHTML = `<i class="${on?'fas':'far'} fa-heart"></i>`;
+  b.classList.toggle('on', on);
+}
+
+function renderLiked() {
+  const el = document.getElementById('likedList');
+  if (!likedArr.length) { el.innerHTML='<div class="empty-ti"><i class="fas fa-heart"></i>Belum ada</div>'; return; }
+  el.innerHTML = likedArr.map((t,i) => `
+    <div class="ti" onclick='playTrackObj(${esc(t)})'>
+      <div class="ti-n">${i+1}</div>
+      <div class="ti-th"><img src="${t.thumbnail||''}" alt="" onerror="this.src='https://via.placeholder.com/44x44/0d0d1c/333?text=♪'"></div>
+      <div class="ti-inf"><div class="ti-t">${t.title}</div><div class="ti-a">${t.artist}</div></div>
+      <span class="ti-src ${t.source==='db'?'src-db':'src-api'}">${t.source==='db'?'DB':'API'}</span>
+      <div class="ti-dur">${t.duration}</div>
+      <button class="ti-del" onclick="event.stopPropagation();rmLiked('${t.id}')"><i class="fas fa-times"></i></button>
+    </div>
+  `).join('');
+}
+
+function rmLiked(id) {
+  likedArr = likedArr.filter(l => l.id !== id);
+  LS.sl(likedArr); renderLiked(); updLikedCnt();
+  if (currentTrack?.id === id) { updHeroLike(); updPBLike(); }
+}
+
+function updLikedCnt() {
+  const n = likedArr.length;
+  document.getElementById('likedBadge').textContent = n;
+  document.getElementById('likedBadge').style.display = n ? 'inline' : 'none';
+  const lb = document.getElementById('likedCntLbl');
+  if (lb) lb.textContent = n + ' lagu';
+}
+
+function toggleLikedSec() {
+  const s = document.getElementById('likedSec');
+  const showing = s.style.display === 'block';
+  s.style.display = showing ? 'none' : 'block';
+  if (!showing) { renderLiked(); updLikedCnt(); }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  DB TRACKS GRID — tampilkan semua lagu yg tersimpan di Supabase
+// ════════════════════════════════════════════════════════════════
+async function loadDBTracks() {
+  if (!sbOk) { toast('Supabase belum dikonfigurasi'); return; }
+  try {
+    const rows = await sb.get('tracks', 'order=last_played.desc.nullslast&limit=30');
+    document.getElementById('dbSec').style.display = 'block';
+    document.getElementById('dbCnt').textContent = rows.length;
+    const el = document.getElementById('dbGrid');
+    if (!rows.length) { el.innerHTML='<p style="color:var(--mt);font-size:.85rem;grid-column:1/-1">Belum ada lagu tersimpan.</p>'; return; }
+    el.innerHTML = rows.map(r => {
+      const t = rowToTrack(r, 'db');
+      return `
+        <div class="dg-card" onclick='playTrackObj(${esc(t)})'>
+          <div class="dg-thumb">
+            <img src="${r.thumbnail||''}" alt="" onerror="this.src='https://via.placeholder.com/148x148/0d0d1c/333?text=♪'">
+            <button class="dg-play" onclick="event.stopPropagation();playTrackObj(${esc(t)})"><i class="fas fa-play"></i></button>
+          </div>
+          <div class="dg-title">${r.title}</div>
+          <div class="dg-artist">${r.artist}</div>
+          <div class="dg-meta">
+            <span>${r.play_count||0}× diputar</span>
+          </div>
+          ${r.searched_by ? `<div class="dg-by">oleh ${r.searched_by}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  } catch (e) { toast('Gagal load DB: ' + e.message); }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SUGGESTIONS
+// ════════════════════════════════════════════════════════════════
+function saveSug(q) {
+  let s = LS.sugs().filter(x => x.toLowerCase() !== q.toLowerCase());
+  s.unshift(q); s = s.slice(0, 12); LS.ssug(s); renderSugs();
+}
+function renderSugs() {
+  document.getElementById('sugList').innerHTML = LS.sugs().map(q => `
+    <div class="sug">
+      <i class="fas fa-history" style="font-size:.6rem"></i>
+      <span onclick="document.getElementById('sInput').value=${JSON.stringify(q)};doSearch()">${q}</span>
+      <span class="sug-x" onclick="rmSug(${JSON.stringify(q)})"><i class="fas fa-times"></i></span>
+    </div>
+  `).join('');
+}
+function rmSug(q) { LS.ssug(LS.sugs().filter(x=>x!==q)); renderSugs(); }
+
+// ════════════════════════════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════════════════════════════
+function switchTab(t) {
+  document.getElementById('tQ').classList.toggle('on', t==='q');
+  document.getElementById('tH').classList.toggle('on', t==='h');
+  document.getElementById('panQ').style.display = t==='q' ? 'flex' : 'none';
+  document.getElementById('panH').style.display = t==='h' ? 'flex' : 'none';
+  if (t==='q') { document.getElementById('panQ').style.flexDirection='column'; }
+  if (t==='h') { document.getElementById('panH').style.flexDirection='column'; renderHistory(); }
+  document.getElementById('tabActBtn').dataset.t = t;
+  document.getElementById('tabActBtn').innerHTML = t==='q'
+    ? '<i class="fas fa-trash-alt"></i> Hapus semua'
+    : '<i class="fas fa-trash-alt"></i> Hapus riwayat';
+}
+function tabAction() {
+  const t = document.getElementById('tabActBtn').dataset.t || 'q';
+  t==='q' ? clearQueue() : clearHistory();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PLAYER
+// ════════════════════════════════════════════════════════════════
+async function playTrackObj(t) {
+  currentTrack = t;
+  qi = queue.findIndex(x => x.id === t.id);
+  document.getElementById('plImg').src            = t.thumbnail || '';
+  document.getElementById('plTitle').textContent  = t.title;
+  document.getElementById('plArt').textContent    = t.artist;
+  document.getElementById('plSrc').textContent    = t.source==='db' ? '📦 Dari Supabase' : '☁️ FAA API';
+
+  audio.src = t.audio;
+  try {
+    await audio.play();
+    isPlaying = true;
+  } catch (e) {
+    toast('⚠️ Gagal memutar: ' + e.message);
+    isPlaying = false;
+  }
+  updAll();
+  showHero(t, t.source || 'api');
+  document.getElementById('pbar').classList.add('up');
+  addToHistory(t);
+  updHeroLike(); updPBLike(); renderQueue(); startProg();
+}
+
+function togglePlay() {
+  if (!currentTrack) return;
+  isPlaying ? audio.pause() : audio.play();
+}
+
+function prevTrack() {
+  if (!queue.length) return;
+  qi = isShuffle ? Math.floor(Math.random()*queue.length) : (qi > 0 ? qi-1 : queue.length-1);
+  playTrackObj(queue[qi]);
+}
+
+function nextTrack() {
+  if (!queue.length) return;
+  qi = isShuffle ? Math.floor(Math.random()*queue.length) : (qi < queue.length-1 ? qi+1 : 0);
+  playTrackObj(queue[qi]);
+}
+
+function toggleShuffle() { isShuffle=!isShuffle; document.getElementById('cbShuf').classList.toggle('on',isShuffle); toast(isShuffle?'Shuffle aktif 🔀':'Shuffle nonaktif'); }
+function toggleRepeat()  { isRepeat=!isRepeat;   document.getElementById('cbRep').classList.toggle('on',isRepeat);   toast(isRepeat?'Repeat aktif 🔁':'Repeat nonaktif'); }
+function toggleMute()    { isMuted=!isMuted; audio.muted=isMuted; document.getElementById('vIco').className=isMuted?'fas fa-volume-mute':vol>.5?'fas fa-volume-up':'fas fa-volume-down'; }
+
+function updAll() {
+  const p = isPlaying && !audio.paused;
+  document.getElementById('cbIco').className = p ? 'fas fa-pause' : 'fas fa-play';
+  document.getElementById('plEq').classList.toggle('on', p);
+  updHeroPlayBtn();
+}
+
+function startProg() {
+  clearInterval(progInt);
+  progInt = setInterval(() => {
+    if (audio.duration) {
+      document.getElementById('prfill').style.width = ((audio.currentTime/audio.duration)*100)+'%';
+      document.getElementById('ptCur').textContent  = fmt(audio.currentTime);
+      document.getElementById('ptTot').textContent  = fmt(audio.duration);
+    }
+  }, 400);
+}
+
+function fmt(s) { return isNaN(s) ? '0:00' : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`; }
+function seek(e) { const r=document.getElementById('prbar').getBoundingClientRect(); audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration; }
+function setVol(e) {
+  const r=document.getElementById('vBar').getBoundingClientRect();
+  vol=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
+  audio.volume=vol;
+  document.getElementById('vFill').style.width=(vol*100)+'%';
+  document.getElementById('vIco').className=vol>.5?'fas fa-volume-up':vol>0?'fas fa-volume-down':'fas fa-volume-mute';
+}
+
+audio.addEventListener('play',  () => { isPlaying=true;  updAll(); startProg(); });
+audio.addEventListener('pause', () => { isPlaying=false; updAll(); });
+audio.addEventListener('ended', () => { isRepeat ? audio.play() : nextTrack(); });
+
+// ════════════════════════════════════════════════════════════════
+//  PROFILE DROPDOWN
+// ════════════════════════════════════════════════════════════════
+function togglePD() { document.getElementById('pdrop').classList.toggle('open'); }
+document.addEventListener('click', e => {
+  if (!e.target.closest('.user-pill') && !e.target.closest('.pdrop'))
+    document.getElementById('pdrop').classList.remove('open');
+});
+
+// ════════════════════════════════════════════════════════════════
+//  STATE MANAGER
+// ════════════════════════════════════════════════════════════════
+function setState(s) {
+  ['stEmpty','stLoad','stErr'].forEach(id => document.getElementById(id).classList.remove('show'));
+  if (s !== 'none') document.getElementById('st'+s.charAt(0).toUpperCase()+s.slice(1)).classList.add('show');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════════════════════════
+let toastT;
+function toast(m) {
+  const el=document.getElementById('toast'); el.textContent=m; el.classList.add('on');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('on'), 2800);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════════
+function esc(obj) { return JSON.stringify(obj).replace(/"/g,'&quot;'); }
+
+// ════════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════════
+(function init() {
+  if (!session) { window.location.href='login.html'; return; }
+
+  // User UI
+  const u = session;
+  const ini = (u.nama||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('uAv').textContent   = ini;
+  document.getElementById('uNm').textContent   = (u.nama||'').split(' ')[0];
+  document.getElementById('uGn').textContent   = `Gen ${u.generasi}`;
+  document.getElementById('pdName').textContent = u.nama || '–';
+  document.getElementById('pdSub').textContent  = `${u.jabatan} · Generasi ${u.generasi}`;
+
+  // Supabase status badge
+  const dbDot = document.getElementById('dbDot');
+  const dbTxt = document.getElementById('dbTxt');
+  if (sbOk) {
+    dbTxt.textContent = 'DB Aktif';
+  } else {
+    dbDot.classList.add('dot-off');
+    dbTxt.textContent = 'DB Offline';
+    toast('⚠️ Supabase belum dikonfigurasi — mode lokal saja');
+  }
+
+  audio.volume = vol;
+  renderSugs(); renderQueue(); renderHistory(); renderLiked(); updLikedCnt();
+  document.getElementById('qBadge').textContent = queue.length;
+  if (queue.length) document.getElementById('qSec').style.display = 'block';
+
+  // tabs default
+  document.getElementById('panQ').style.cssText = 'display:flex;flex-direction:column';
+  document.getElementById('panH').style.display = 'none';
+  document.getElementById('tabActBtn').dataset.t = 'q';
+
+  // Restore last track (tanpa autoplay)
+  if (histArr.length) {
+    const last = histArr[0];
+    currentTrack = last;
+    showHero(last, last.source || 'db');
+    setState('none');
+    document.getElementById('plImg').src           = last.thumbnail || '';
+    document.getElementById('plTitle').textContent = last.title;
+    document.getElementById('plArt').textContent   = last.artist;
+    document.getElementById('plSrc').textContent   = last.source==='db' ? '📦 Dari Supabase' : '☁️ FAA API';
+    document.getElementById('pbar').classList.add('up');
+    updPBLike();
+  }
+
+  // Load db grid jika Supabase aktif
+  if (sbOk) loadDBTracks();
+})();
+</script>
+</body>
+</html>
