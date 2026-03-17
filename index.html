@@ -954,73 +954,381 @@ function switchTab(t){
 function tabAction(){const t=document.getElementById('tabActBtn').dataset.t||'q';t==='q'?clearQueue():clearHistory();}
 
 // ════════════════════════════════════════════════════════════════
-//  PLAYER
+//  PLAYER & AUDIO CACHE SYSTEM
 // ════════════════════════════════════════════════════════════════
-async function playTrackObj(t){
-  currentTrack=t; qi=queue.findIndex(x=>x.id===t.id);
-  document.getElementById('plImg').src=t.thumbnail||'';
-  document.getElementById('plTitle').textContent=t.title;
-  document.getElementById('plArt').textContent=t.artist;
-  audio.src=t.audio;
-  try{await audio.play();isPlaying=true;}
-  catch(e){toast('⚠️ Gagal memutar: '+e.message);isPlaying=false;}
-  updAll(); showHero(t,t.source||'api');
-  document.getElementById('pbar').classList.add('up');
-  addToHistory(t); updHeroLike(); updPBLike(); renderQueue(); startProg();
+
+// Database IndexedDB untuk menyimpan file MP3
+const DB_NAME = 'PagaskaMusicDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'audioCache';
+
+let db = null;
+let currentAudioUrl = null; // URL object untuk revoke nanti
+
+// Inisialisasi IndexedDB
+function initDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+            db = request.result;
+            resolve(db);
+        };
+        request.onupgradeneeded = (event) => {
+            const database = event.target.result;
+            if (!database.objectStoreNames.contains(STORE_NAME)) {
+                const store = database.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                store.createIndex('timestamp', 'timestamp', { unique: false });
+            }
+        };
+    });
 }
-function togglePlay(){if(!currentTrack)return;isPlaying?audio.pause():audio.play();}
-function prevTrack(){if(!queue.length)return;qi=isShuffle?Math.floor(Math.random()*queue.length):(qi>0?qi-1:queue.length-1);playTrackObj(queue[qi]);}
-function nextTrack(){if(!queue.length)return;qi=isShuffle?Math.floor(Math.random()*queue.length):(qi<queue.length-1?qi+1:0);playTrackObj(queue[qi]);}
-function toggleShuffle(){isShuffle=!isShuffle;document.getElementById('cbShuf').classList.toggle('on',isShuffle);toast(isShuffle?'Shuffle aktif 🔀':'Shuffle nonaktif');}
-function toggleRepeat(){isRepeat=!isRepeat;document.getElementById('cbRep').classList.toggle('on',isRepeat);toast(isRepeat?'Repeat aktif 🔁':'Repeat nonaktif');}
-function toggleMute(){isMuted=!isMuted;audio.muted=isMuted;document.getElementById('vIco').className=isMuted?'fas fa-volume-mute':vol>.5?'fas fa-volume-up':'fas fa-volume-down';}
+
+// Simpan blob audio ke IndexedDB
+async function saveAudioToCache(id, blob, metadata) {
+    if (!db) await initDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const data = {
+            id: id,
+            blob: blob,
+            metadata: metadata,
+            timestamp: Date.now(),
+            size: blob.size
+        };
+        const request = store.put(data);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Ambil audio dari IndexedDB
+async function getAudioFromCache(id) {
+    if (!db) await initDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readonly');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.get(id);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Hapus cache lama (cleanup)
+async function cleanupOldCache(maxAgeDays = 7) {
+    if (!db) return;
+    const maxAge = Date.now() - (maxAgeDays * 24 * 60 * 60 * 1000);
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const index = store.index('timestamp');
+    
+    const request = index.openCursor();
+    request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+            if (cursor.value.timestamp < maxAge) {
+                store.delete(cursor.primaryKey);
+            }
+            cursor.continue();
+        }
+    };
+}
+
+// Download audio dari URL dengan retry logic
+async function downloadAudio(url, trackId, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'audio/mpeg, audio/*, */*',
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const blob = await response.blob();
+            
+            // Validasi ukuran dan tipe
+            if (blob.size < 1024) {
+                throw new Error('File terlalu kecil, mungkin bukan audio');
+            }
+            
+            return blob;
+        } catch (error) {
+            console.warn(`Download attempt ${i + 1} failed:`, error);
+            if (i === retries - 1) throw error;
+            await new Promise(r => setTimeout(r, 1000 * (i + 1))); // Exponential backoff
+        }
+    }
+}
+
+// Fungsi utama untuk memuat audio (dari cache atau download)
+async function loadAudio(track) {
+    const trackId = track.id;
+    
+    // Cek cache dulu
+    try {
+        const cached = await getAudioFromCache(trackId);
+        if (cached) {
+            console.log('📦 Memutar dari cache:', track.title);
+            const blobUrl = URL.createObjectURL(cached.blob);
+            return { url: blobUrl, fromCache: true, blob: cached.blob };
+        }
+    } catch (e) {
+        console.warn('Gagal membaca cache:', e);
+    }
+    
+    // Download dari FAA API
+    console.log('⬇️ Download dari FAA:', track.title);
+    toast('⬇️ Mengunduh lagu...');
+    
+    try {
+        const blob = await downloadAudio(track.audio, trackId);
+        
+        // Simpan ke cache
+        await saveAudioToCache(trackId, blob, {
+            title: track.title,
+            artist: track.artist,
+            duration: track.duration
+        });
+        
+        const blobUrl = URL.createObjectURL(blob);
+        toast('✓ Disimpan ke cache lokal');
+        return { url: blobUrl, fromCache: false, blob: blob };
+    } catch (error) {
+        console.error('Download failed:', error);
+        throw new Error('Gagal mengunduh: ' + error.message);
+    }
+}
+
+// Cleanup URL object lama
+function cleanupAudioUrl() {
+    if (currentAudioUrl) {
+        URL.revokeObjectURL(currentAudioUrl);
+        currentAudioUrl = null;
+    }
+}
+
+async function playTrackObj(t){
+    // Cleanup audio sebelumnya
+    cleanupAudioUrl();
+    if (!audio.paused) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+    
+    currentTrack = t; 
+    qi = queue.findIndex(x => x.id === t.id);
+    
+    // Update UI
+    document.getElementById('plImg').src = t.thumbnail || '';
+    document.getElementById('plTitle').textContent = t.title;
+    document.getElementById('plArt').textContent = t.artist;
+    
+    try {
+        // Load audio (dari cache atau download)
+        const audioData = await loadAudio(t);
+        currentAudioUrl = audioData.url;
+        
+        // Set source dan play
+        audio.src = audioData.url;
+        audio.type = 'audio/mpeg';
+        
+        // Tunggu metadata load sebelum play
+        await new Promise((resolve, reject) => {
+            const onCanPlay = () => {
+                audio.removeEventListener('canplaythrough', onCanPlay);
+                audio.removeEventListener('error', onError);
+                resolve();
+            };
+            const onError = (e) => {
+                audio.removeEventListener('canplaythrough', onCanPlay);
+                audio.removeEventListener('error', onError);
+                reject(new Error('Audio error: ' + (audio.error?.message || 'Unknown')));
+            };
+            
+            audio.addEventListener('canplaythrough', onCanPlay);
+            audio.addEventListener('error', onError);
+            audio.load();
+        });
+        
+        await audio.play();
+        isPlaying = true;
+        
+    } catch (e) {
+        console.error('Play error:', e);
+        toast('⚠️ Gagal memutar: ' + e.message);
+        isPlaying = false;
+        
+        // Fallback: coba langsung dari URL asli jika cache gagal
+        if (e.message.includes('download') || e.message.includes('unduh')) {
+            try {
+                console.log('🔄 Fallback ke URL langsung');
+                audio.src = t.audio;
+                await audio.play();
+                isPlaying = true;
+                toast('⚠️ Memutar tanpa cache');
+            } catch (fallbackError) {
+                toast('❌ Gagal memutar lagu');
+                return;
+            }
+        }
+    }
+    
+    updAll(); 
+    showHero(t, t.source || 'api');
+    document.getElementById('pbar').classList.add('up');
+    addToHistory(t); 
+    updHeroLike(); 
+    updPBLike(); 
+    renderQueue(); 
+    startProg();
+}
+
+function togglePlay(){
+    if (!currentTrack) return;
+    if (isPlaying) {
+        audio.pause();
+    } else {
+        audio.play().catch(e => {
+            console.error('Resume failed:', e);
+            toast('⚠️ Gagal melanjutkan pemutaran');
+        });
+    }
+}
+
+function prevTrack(){
+    if (!queue.length) return;
+    qi = isShuffle ? Math.floor(Math.random() * queue.length) : (qi > 0 ? qi - 1 : queue.length - 1);
+    playTrackObj(queue[qi]);
+}
+
+function nextTrack(){
+    if (!queue.length) return;
+    qi = isShuffle ? Math.floor(Math.random() * queue.length) : (qi < queue.length - 1 ? qi + 1 : 0);
+    playTrackObj(queue[qi]);
+}
+
+function toggleShuffle(){
+    isShuffle = !isShuffle;
+    document.getElementById('cbShuf').classList.toggle('on', isShuffle);
+    toast(isShuffle ? 'Shuffle aktif 🔀' : 'Shuffle nonaktif');
+}
+
+function toggleRepeat(){
+    isRepeat = !isRepeat;
+    document.getElementById('cbRep').classList.toggle('on', isRepeat);
+    toast(isRepeat ? 'Repeat aktif 🔁' : 'Repeat nonaktif');
+}
+
+function toggleMute(){
+    isMuted = !isMuted;
+    audio.muted = isMuted;
+    document.getElementById('vIco').className = isMuted ? 'fas fa-volume-mute' : vol > .5 ? 'fas fa-volume-up' : 'fas fa-volume-down';
+}
 
 function updAll(){
-  const p=isPlaying&&!audio.paused;
-  document.getElementById('cbIco').className=p?'fas fa-pause':'fas fa-play';
-  document.getElementById('plEq').classList.toggle('on',p);
-  updHeroPlayBtn();
-}
-function startProg(){
-  clearInterval(progInt);
-  progInt=setInterval(()=>{
-    if(audio.duration){
-      document.getElementById('prfill').style.width=((audio.currentTime/audio.duration)*100)+'%';
-      document.getElementById('ptCur').textContent=fmt(audio.currentTime);
-      document.getElementById('ptTot').textContent=fmt(audio.duration);
-    }
-  },400);
-}
-function fmt(s){return isNaN(s)?'0:00':`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;}
-function seek(e){const r=document.getElementById('prbar').getBoundingClientRect();audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration;}
-function setVol(e){
-  const r=document.getElementById('vBar').getBoundingClientRect();
-  vol=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
-  audio.volume=vol;
-  document.getElementById('vFill').style.width=(vol*100)+'%';
-  document.getElementById('vIco').className=vol>.5?'fas fa-volume-up':vol>0?'fas fa-volume-down':'fas fa-volume-mute';
+    const p = isPlaying && !audio.paused;
+    document.getElementById('cbIco').className = p ? 'fas fa-pause' : 'fas fa-play';
+    document.getElementById('plEq').classList.toggle('on', p);
+    updHeroPlayBtn();
 }
 
-audio.addEventListener('play',()=>{isPlaying=true;updAll();startProg();});
-audio.addEventListener('pause',()=>{isPlaying=false;updAll();});
-audio.addEventListener('ended',()=>{isRepeat?audio.play():nextTrack();});
+function startProg(){
+    clearInterval(progInt);
+    progInt = setInterval(() => {
+        if (audio.duration) {
+            document.getElementById('prfill').style.width = ((audio.currentTime / audio.duration) * 100) + '%';
+            document.getElementById('ptCur').textContent = fmt(audio.currentTime);
+            document.getElementById('ptTot').textContent = fmt(audio.duration);
+        }
+    }, 400);
+}
+
+function fmt(s){
+    return isNaN(s) ? '0:00' : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+}
+
+function seek(e){
+    const r = document.getElementById('prbar').getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    if (audio.duration) {
+        audio.currentTime = ratio * audio.duration;
+        document.getElementById('prfill').style.width = (ratio * 100) + '%';
+    }
+}
+
+function setVol(e){
+    const r = document.getElementById('vBar').getBoundingClientRect();
+    vol = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    audio.volume = vol;
+    document.getElementById('vFill').style.width = (vol * 100) + '%';
+    document.getElementById('vIco').className = vol > .5 ? 'fas fa-volume-up' : vol > 0 ? 'fas fa-volume-down' : 'fas fa-volume-mute';
+}
+
+// Event listeners untuk audio
+audio.addEventListener('play', () => { isPlaying = true; updAll(); startProg(); });
+audio.addEventListener('pause', () => { isPlaying = false; updAll(); });
+audio.addEventListener('ended', () => { 
+    cleanupAudioUrl();
+    isRepeat ? audio.play() : nextTrack(); 
+});
+audio.addEventListener('error', (e) => {
+    console.error('Audio error:', audio.error);
+    let msg = 'Gagal memutar audio';
+    switch(audio.error?.code) {
+        case 1: msg = 'Proses dihentikan'; break;
+        case 2: msg = 'Error jaringan'; break;
+        case 3: msg = 'Format tidak didukung'; break;
+        case 4: msg = 'File tidak ditemukan'; break;
+    }
+    toast('❌ ' + msg);
+    isPlaying = false;
+    updAll();
+});
 
 // Touch swipe progress bar
 (function(){
-  const pb=document.getElementById('prbar');
-  pb.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
-  pb.addEventListener('touchmove',e=>{
-    e.preventDefault();
-    const r=pb.getBoundingClientRect();
-    const ratio=Math.max(0,Math.min(1,(e.touches[0].clientX-r.left)/r.width));
-    document.getElementById('prfill').style.width=(ratio*100)+'%';
-  },{passive:false});
-  pb.addEventListener('touchend',e=>{
-    const r=pb.getBoundingClientRect();
-    const ratio=Math.max(0,Math.min(1,(e.changedTouches[0].clientX-r.left)/r.width));
-    if(audio.duration)audio.currentTime=ratio*audio.duration;
-  });
+    const pb = document.getElementById('prbar');
+    let isDragging = false;
+    
+    pb.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        updateProgressFromTouch(e.touches[0]);
+    }, {passive: false});
+    
+    pb.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        updateProgressFromTouch(e.touches[0]);
+    }, {passive: false});
+    
+    pb.addEventListener('touchend', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        const r = pb.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (e.changedTouches[0].clientX - r.left) / r.width));
+        if (audio.duration) audio.currentTime = ratio * audio.duration;
+    });
+    
+    function updateProgressFromTouch(touch) {
+        const r = pb.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (touch.clientX - r.left) / r.width));
+        document.getElementById('prfill').style.width = (ratio * 100) + '%';
+    }
 })();
+
+// Inisialisasi DB saat startup
+initDB().then(() => {
+    console.log('✅ IndexedDB ready');
+    cleanupOldCache(); // Bersihkan cache lama
+}).catch(err => {
+    console.warn('⚠️ IndexedDB tidak tersedia:', err);
+});
 
 // ════════════════════════════════════════════════════════════════
 //  PROFILE DROPDOWN
